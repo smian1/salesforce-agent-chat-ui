@@ -17,7 +17,7 @@ export default function Home() {
         </div>
         
         <h1 className="text-4xl font-bold text-primary mb-6">
-          Salman Agent
+          Salman Bot
         </h1>
         <p className="text-xl text-foreground mb-8">
           Chat with my agent to interact and ask questions about me
