@@ -1,13 +1,51 @@
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-background">
-      <div className="w-full max-w-4xl text-center">
-        {/* Profile Image - Circular */}
-        <div className="relative w-32 h-32 mx-auto mb-8 rounded-full overflow-hidden border-4 border-primary shadow-lg">
-          {/* Profile image */}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-dark relative overflow-hidden">
+      {/* Background elements */}
+      <div 
+        className="absolute inset-0 z-0 overflow-hidden"
+        style={{ 
+          backgroundImage: `radial-gradient(circle at 20% 30%, hsla(263, 70%, 50%, 0.15), transparent 20%), 
+                           radial-gradient(circle at 75% 15%, hsla(199, 89%, 48%, 0.1), transparent 20%),
+                           radial-gradient(circle at 85% 80%, hsla(283, 70%, 40%, 0.1), transparent 30%)`,
+        }}
+      >
+        {/* More subtle, modern pattern */}
+        <div className="absolute inset-0 z-0 opacity-10" 
+          style={{ 
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '30px 30px'
+          }}
+        ></div>
+      </div>
+      
+      {/* Floating orbs */}
+      <div className="absolute inset-0 z-0 opacity-30 overflow-hidden">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div 
+            key={i}
+            className={`absolute rounded-full ${i % 2 === 0 ? 'bg-primary animate-pulse-glow' : 'bg-secondary glow-secondary'}`}
+            style={{
+              width: `${Math.random() * 2.5 + 0.5}rem`,
+              height: `${Math.random() * 2.5 + 0.5}rem`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              opacity: Math.random() * 0.5 + 0.25,
+              animation: `float ${Math.random() * 8 + 5}s ease-in-out infinite, pulse ${Math.random() * 4 + 3}s infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              filter: 'blur(4px)'
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main content with glass card */}
+      <div className="w-full max-w-4xl text-center p-8 z-10">
+        {/* Profile Image with glow and animation */}
+        <div className="relative w-40 h-40 mx-auto mb-8 rounded-full overflow-hidden border-4 border-white/10 glow animate-float shadow-lg">
           <Image 
             src="/profile.png" 
             alt="Salman's Profile" 
@@ -16,36 +54,39 @@ export default function Home() {
           />
         </div>
         
-        <h1 className="text-4xl font-bold text-primary mb-6">
-          Salman Bot
-        </h1>
-        <p className="text-xl text-foreground mb-8">
-          Chat with my agent to interact and ask questions about me
-        </p>
-        
-        <Link 
-          href="/chat" 
-          className="inline-flex items-center justify-center px-6 py-3 text-lg font-medium text-white bg-primary rounded-md shadow-md hover:bg-accent transition-colors duration-200"
-        >
-          Start Chatting
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 ml-2" 
-            viewBox="0 0 20 20" 
-            fill="currentColor"
+        <div className="glass rounded-2xl p-8 border border-white/10 glow-subtle">
+          <h1 className="text-5xl font-bold mb-6 text-white glow-text">
+            Salman Bot
+          </h1>
+          
+          <p className="text-xl text-foreground/90 mb-8 max-w-2xl mx-auto">
+            Chat with my agent to interact and ask questions about me
+          </p>
+          
+          <Link 
+            href="/chat" 
+            className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-secondary rounded-full shadow-md hover:opacity-90 transition-all duration-300 glow-secondary hover:glow animate-pulse-glow"
           >
-            <path 
-              fillRule="evenodd" 
-              d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" 
-              clipRule="evenodd" 
-            />
-          </svg>
-        </Link>
+            Start Chatting
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-6 w-6 ml-2" 
+              viewBox="0 0 20 20" 
+              fill="currentColor"
+            >
+              <path 
+                fillRule="evenodd" 
+                d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" 
+                clipRule="evenodd" 
+              />
+            </svg>
+          </Link>
+        </div>
+
+        {/* Decorative circles */}
+        <div className="absolute top-1/4 left-1/6 w-16 h-16 rounded-full bg-gradient-primary opacity-20 blur-xl"></div>
+        <div className="absolute bottom-1/4 right-1/6 w-24 h-24 rounded-full bg-gradient-secondary opacity-20 blur-xl"></div>
       </div>
-      
-      <footer className="mt-16 text-center text-muted-foreground">
-        <p>Powered by Salesforce AgentForce API</p>
-      </footer>
     </div>
   )
 } 

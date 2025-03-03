@@ -4,35 +4,35 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 222 47% 11%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 217 33% 17%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 217 33% 17%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 199 89% 48%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 263 70% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -73,4 +73,82 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, hsl(263, 70%, 50%) 0%, hsl(283, 70%, 45%) 100%);
+}
+
+.bg-gradient-secondary {
+  background: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(180, 80%, 50%) 100%);
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(135deg, hsl(222, 47%, 11%) 0%, hsl(217, 33%, 17%) 100%);
+}
+
+.bg-gradient-card {
+  background: linear-gradient(135deg, hsla(217, 33%, 17%, 0.8) 0%, hsla(222, 47%, 11%, 0.9) 100%);
+  backdrop-filter: blur(0.5rem);
+}
+
+/* Glowing effect */
+.glow {
+  box-shadow: 0 0 1rem 0.25rem hsla(263, 70%, 50%, 0.3);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 1rem 0.25rem hsla(199, 89%, 48%, 0.3);
+}
+
+.glow-text {
+  text-shadow: 0 0 0.75rem hsla(263, 70%, 70%, 0.8);
+}
+
+.glow-subtle {
+  box-shadow: 0 0 0.5rem 0.125rem hsla(263, 70%, 50%, 0.2);
+}
+
+/* Enhanced animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.75rem); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 0 1rem 0.25rem hsla(var(--primary), 0.3);
+  }
+  50% { 
+    opacity: 0.7;
+    box-shadow: 0 0 1.5rem 0.5rem hsla(var(--primary), 0.5);
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(0.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 } 
