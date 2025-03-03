@@ -43,9 +43,9 @@ export default function Home() {
       </div>
 
       {/* Main content with glass card */}
-      <div className="w-full max-w-4xl text-center p-8 z-10">
+      <div className="w-full max-w-4xl text-center p-4 md:p-8 z-10">
         {/* Profile Image with glow and animation */}
-        <div className="relative w-40 h-40 mx-auto mb-8 rounded-full overflow-hidden border-4 border-white/10 glow animate-float shadow-lg">
+        <div className="relative w-28 h-28 md:w-40 md:h-40 mx-auto mb-6 md:mb-8 rounded-full overflow-hidden border-4 border-white/10 glow animate-float shadow-lg">
           <Image 
             src="/profile.png" 
             alt="Salman's Profile" 
@@ -54,23 +54,23 @@ export default function Home() {
           />
         </div>
         
-        <div className="glass rounded-2xl p-8 border border-white/10 glow-subtle">
-          <h1 className="text-5xl font-bold mb-6 text-white glow-text">
+        <div className="glass rounded-2xl p-4 md:p-8 border border-white/10 glow-subtle">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6 text-white glow-text">
             Salman Bot
           </h1>
           
-          <p className="text-xl text-foreground/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-foreground/90 mb-6 md:mb-8 max-w-2xl mx-auto">
             Chat with my agent to interact and ask questions about me
           </p>
           
           <Link 
             href="/chat" 
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-secondary rounded-full shadow-md hover:opacity-90 transition-all duration-300 glow-secondary hover:glow animate-pulse-glow"
+            className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 text-base md:text-lg font-medium text-white bg-gradient-secondary rounded-full shadow-md hover:opacity-90 transition-all duration-300 glow-secondary hover:glow animate-pulse-glow"
           >
             Start Chatting
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-6 w-6 ml-2" 
+              className="h-5 w-5 md:h-6 md:w-6 ml-2" 
               viewBox="0 0 20 20" 
               fill="currentColor"
             >
@@ -84,8 +84,23 @@ export default function Home() {
         </div>
 
         {/* Decorative circles */}
-        <div className="absolute top-1/4 left-1/6 w-16 h-16 rounded-full bg-gradient-primary opacity-20 blur-xl"></div>
-        <div className="absolute bottom-1/4 right-1/6 w-24 h-24 rounded-full bg-gradient-secondary opacity-20 blur-xl"></div>
+        <div className="absolute top-1/4 left-1/6 w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-primary opacity-20 blur-xl"></div>
+        <div className="absolute bottom-1/4 right-1/6 w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-secondary opacity-20 blur-xl"></div>
+      </div>
+      
+      {/* Powered by footer */}
+      <div className="absolute bottom-4 left-0 w-full text-center z-10">
+        <div className="inline-flex items-center justify-center glass px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-white/10 text-xs">
+          <span className="text-white/70 mr-1.5">Powered by</span>
+          <Image 
+            src="/agentforce.png" 
+            alt="Salesforce AgentForce" 
+            width={20} 
+            height={20}
+            className="mr-1"
+          />
+          <span className="font-medium text-white/80">Salesforce AgentForce</span>
+        </div>
       </div>
     </div>
   )

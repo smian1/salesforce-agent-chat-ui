@@ -261,11 +261,11 @@ export default function ChatPage() {
       
       {/* Header - updated with glassmorphism */}
       <header className="glass z-10 shadow-md bg-gradient-primary animate-gradient border-b border-white/10">
-        <div className="container mx-auto flex items-center justify-between p-4">
-          <div className="flex items-center space-x-4">
+        <div className="container mx-auto flex items-center justify-between p-3 md:p-4">
+          <div className="flex items-center">
             {/* Logo */}
             <Link href="/" className="flex items-center group">
-              <div className="relative w-10 h-10 rounded-full overflow-hidden glow-subtle transition-all duration-300 group-hover:glow">
+              <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden glow-subtle transition-all duration-300 group-hover:glow">
                 <Image 
                   src="/profile.png" 
                   alt="Salman Agent Logo" 
@@ -274,24 +274,24 @@ export default function ChatPage() {
                   className="object-cover"
                 />
               </div>
-              <h1 className="text-xl font-bold ml-3 text-white">Salman Agent</h1>
+              <h1 className="text-lg md:text-xl font-bold ml-2 md:ml-3 text-white">Salman Agent</h1>
             </Link>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             {/* Connection status */}
-            <div className="text-sm flex items-center">
-              <span className={`h-2 w-2 rounded-full mr-2 ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></span>
-              <span>{isConnected ? 'Connected' : 'Disconnecting'}</span>
+            <div className="text-xs md:text-sm flex items-center mr-2 md:mr-4">
+              <span className={`h-2 w-2 rounded-full mr-1 md:mr-2 ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></span>
+              <span className="hidden xs:inline">{isConnected ? 'Connected' : 'Disconnecting'}</span>
             </div>
             
             {/* New Chat button - completely redesigned */}
             <button 
               onClick={() => initSession()}
               disabled={isLoading}
-              className="flex items-center space-x-1 bg-gradient-secondary hover:opacity-90 text-white px-4 py-2 rounded-full shadow-md transition-all duration-300 font-medium glow-secondary hover:glow"
+              className="flex items-center space-x-1 bg-gradient-secondary hover:opacity-90 text-white px-2 py-1.5 md:px-4 md:py-2 rounded-full shadow-md transition-all duration-300 font-medium glow-secondary hover:glow text-xs md:text-sm"
             >
-              <RefreshCw className="h-4 w-4 mr-1" />
+              <RefreshCw className="h-3 w-3 md:h-4 md:w-4 mr-1" />
               <span>New Chat</span>
             </button>
           </div>
@@ -299,7 +299,7 @@ export default function ChatPage() {
       </header>
       
       {/* Chat container */}
-      <div className="flex-1 overflow-y-auto p-4 container mx-auto max-w-4xl z-10">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4 container mx-auto max-w-4xl z-10">
         {messages.length === 0 && !isLoading ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <div className="w-24 h-24 mb-6 rounded-full bg-gradient-card glass flex items-center justify-center animate-float">
@@ -352,7 +352,7 @@ export default function ChatPage() {
                   
                   {/* Message bubble - completely redesigned */}
                   <div 
-                    className={`rounded-2xl px-4 py-3 shadow-lg transition-all ${
+                    className={`rounded-2xl px-3 py-2 md:px-4 md:py-3 shadow-lg transition-all ${
                       message.role === 'user'
                         ? 'bg-gradient-secondary text-white rounded-tr-none'
                         : message.isProgress
@@ -390,7 +390,7 @@ export default function ChatPage() {
       </div>
       
       {/* Message input - enhanced with glassmorphism */}
-      <div className="border-t border-white/10 p-4 glass z-10">
+      <div className="border-t border-white/10 p-4 glass z-10 relative">
         <div className="container mx-auto max-w-4xl">
           <form onSubmit={sendMessage} className="flex items-center space-x-2">
             <div className="flex-1 relative">
@@ -418,6 +418,21 @@ export default function ChatPage() {
               <Send className="h-5 w-5" />
             </button>
           </form>
+        </div>
+        
+        {/* Powered by footer - moved inside the input container */}
+        <div className="w-full flex justify-center mt-2">
+          <div className="inline-flex items-center justify-center glass px-3 py-1 rounded-full border border-white/10 text-xs">
+            <span className="text-white/70 mr-1.5">Powered by</span>
+            <Image 
+              src="/agentforce.png" 
+              alt="Salesforce AgentForce" 
+              width={16} 
+              height={16}
+              className="mr-1"
+            />
+            <span className="font-medium text-white/80">Salesforce AgentForce</span>
+          </div>
         </div>
       </div>
     </div>
