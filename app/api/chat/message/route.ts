@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Send the message and get the raw streaming response
+    // Note: The client already sets the Accept: text/event-stream header
     const rawStream = await client.sendMessageStreaming(sessionId, message)
     
     // Transform the raw stream into parsed events
@@ -58,6 +59,9 @@ export async function GET(request: NextRequest) {
               return
             }
             
+            // Log the event for debugging
+            console.log('Sending SSE event:', value)
+            
             // Convert the event to SSE format
             const event = `data: ${JSON.stringify(value)}\n\n`
             controller.enqueue(new TextEncoder().encode(event))
@@ -75,6 +79,13 @@ export async function GET(request: NextRequest) {
             
             controller.enqueue(new TextEncoder().encode(errorEvent))
             
+            // Send end of response to ensure client knows the stream is done
+            const endEvent = `data: ${JSON.stringify({ 
+              type: 'EndOfResponse'
+            })}\n\n`
+            
+            controller.enqueue(new TextEncoder().encode(endEvent))
+            
             // Close the stream after error
             controller.close()
           })
@@ -85,11 +96,11 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    // Return the stream as an SSE response
+    // Return the stream as an SSE response with appropriate headers
     return new Response(sseStream, {
       headers: {
         'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
       },
     })

@@ -16,6 +16,12 @@ export type EventData = {
 
 /**
  * Transforms a ReadableStream from Salesforce into a stream of parsed events
+ * 
+ * Based on the Salesforce documentation, the API returns events in the following format:
+ * - TextChunk: Contains a chunk of text from the response
+ * - ProgressIndicator: Indicates that a response is in progress
+ * - Inform: Contains the complete message
+ * - EndOfTurn: Indicates that the response is complete
  */
 export function transformSalesforceStream(stream: ReadableStream): ReadableStream<EventData> {
   // Create a TextDecoder to convert Uint8Array chunks to strings
@@ -34,147 +40,91 @@ export function transformSalesforceStream(stream: ReadableStream): ReadableStrea
       const lines = buffer.split('\n');
       buffer = lines.pop() || ''; // Keep the last line in the buffer (it might be incomplete)
       
-      let currentEventType = '';
       let currentEventData = '';
       
       for (const line of lines) {
-        console.log('Debug - Raw line:', line); // Debug logging
+        // Skip empty lines
+        if (!line.trim()) continue;
         
-        // Check if this is an event line
-        if (line.startsWith('event:')) {
-          currentEventType = line.substring(7).trim();
-          continue;
-        }
-        
-        // Check if this is a data line
+        // Check if this is a data line (SSE format)
         if (line.startsWith('data:')) {
           currentEventData = line.substring(5).trim();
           
-          // If we have both event type and data, process it
-          if (currentEventType && currentEventData) {
-            try {
-              const jsonData = JSON.parse(currentEventData);
-              console.log('Debug - Parsed data:', jsonData);
+          try {
+            // Parse the JSON data
+            const jsonData = JSON.parse(currentEventData);
+            console.log('Debug - Parsed event data:', jsonData);
+            
+            // Check if we have a message object
+            if (jsonData.message) {
+              const messageObj = jsonData.message;
               
-              // Handle different event types
-              if (currentEventType === 'INFORM' && jsonData.message && jsonData.message.type === 'Inform') {
-                // Check if this is a thinking/processing message or a real response
-                const messageText = jsonData.message.message || '';
-                
-                // Detect if this is a "thinking" message like "Digging into..."
-                const isThinkingMessage = /^(Digging into|Looking up|Searching for|Analyzing|Checking|Let me|I'm thinking)/i.test(messageText.trim());
-                
-                controller.enqueue({
-                  type: isThinkingMessage ? 'Progress' : 'Text',
-                  text: messageText
-                });
-              } 
-              // Handle progress indicators
-              else if (currentEventType === 'PROGRESS' || 
-                      (jsonData.message && jsonData.message.type === 'ProgressIndicator')) {
-                let text = '';
-                if (jsonData.message && jsonData.message.message) {
-                  text = jsonData.message.message;
-                } else if (jsonData.message && jsonData.message.type === 'ProgressIndicator') {
-                  text = 'Processing...';
-                }
-                
-                controller.enqueue({
-                  type: 'Progress',
-                  text
-                });
-              } 
-              // Handle end of turn
-              else if (currentEventType === 'END_OF_TURN' || 
-                      (jsonData.message && jsonData.message.type === 'EndOfTurn')) {
-                controller.enqueue({
-                  type: 'EndOfResponse'
-                });
-              }
-              
-            } catch (e) {
-              console.error('Error parsing JSON data:', e);
-              
-              // If JSON parsing fails, try to extract text using regex
-              if (currentEventType === 'INFORM' || currentEventType === 'PROGRESS') {
-                // Try to extract any meaningful text
-                const text = currentEventData.replace(/[{}"\\]/g, '').trim();
-                if (text) {
-                  // Detect if this is a "thinking" message
-                  const isThinkingMessage = /^(Digging into|Looking up|Searching for|Analyzing|Checking|Let me|I'm thinking)/i.test(text.trim());
-                  
+              // Handle different message types based on Salesforce documentation
+              switch (messageObj.type) {
+                case 'TextChunk':
+                  // Text chunk contains a piece of the response
                   controller.enqueue({
-                    type: isThinkingMessage ? 'Progress' : 'Text',
-                    text
+                    type: 'Text',
+                    text: messageObj.message || ''
                   });
-                }
+                  break;
+                  
+                case 'ProgressIndicator':
+                  // Progress indicator shows the agent is working
+                  controller.enqueue({
+                    type: 'Progress',
+                    text: messageObj.message || 'Working on it...'
+                  });
+                  break;
+                  
+                case 'Inform':
+                  // Inform contains the complete message
+                  controller.enqueue({
+                    type: 'Text',
+                    text: messageObj.message || ''
+                  });
+                  break;
+                  
+                case 'EndOfTurn':
+                  // End of turn indicates the response is complete
+                  controller.enqueue({
+                    type: 'EndOfResponse'
+                  });
+                  break;
+                  
+                default:
+                  // For any other message type, try to extract useful text
+                  if (messageObj.message) {
+                    // Check if this looks like a progress indicator
+                    if (messageObj.indicatorType === 'ACTION' || 
+                        /^(Digging into|Looking up|Searching for|Analyzing|Checking|Working on)/i.test(messageObj.message)) {
+                      controller.enqueue({
+                        type: 'Progress',
+                        text: messageObj.message
+                      });
+                    } else {
+                      controller.enqueue({
+                        type: 'Text',
+                        text: messageObj.message
+                      });
+                    }
+                  }
               }
             }
+          } catch (e) {
+            console.error('Error parsing JSON data:', e, 'Raw data:', currentEventData);
             
-            // Reset for next event
-            currentEventType = '';
-            currentEventData = '';
+            // If JSON parsing fails, try to send the raw data
+            if (currentEventData) {
+              controller.enqueue({
+                type: 'Text',
+                text: `[Parsing Error] ${currentEventData}`
+              });
+            }
           }
-        } else if (line.trim() === '') {
-          // Empty line signals the end of an event
-          currentEventType = '';
+          
+          // Reset for next event
           currentEventData = '';
-        }
-      }
-      
-      // Check for fallback patterns if we don't find standard SSE format
-      if (buffer.length > 0) {
-        // Pattern 1: Look for text chunks in the standard format
-        const textChunkRegex = /Agent \((?:streaming|simple streaming)\): (.+?)(?=\n|$)/g;
-        let match;
-        let foundMatch = false;
-        
-        while ((match = textChunkRegex.exec(buffer)) !== null) {
-          const text = match[1];
-          
-          controller.enqueue({
-            type: 'Text',
-            text
-          });
-          
-          foundMatch = true;
-        }
-        
-        // If we didn't find a match with the first pattern, try other patterns
-        if (!foundMatch) {
-          // Pattern 2: Look for any text after "Agent:" with or without spaces
-          const agentTextRegex = /Agent:?\s*(.+?)(?=\n|$)/;
-          const agentMatch = buffer.match(agentTextRegex);
-          
-          if (agentMatch && agentMatch[1]) {
-            const text = agentMatch[1].trim();
-            
-            controller.enqueue({
-              type: 'Text',
-              text
-            });
-          } 
-          // Pattern 3: If the output contains "(simple streaming):" or similar, extract the actual content
-          else if (buffer.includes('(simple streaming):')) {
-            // Try to get content after the marker
-            const parts = buffer.split('(simple streaming):');
-            if (parts.length > 1) {
-              const text = parts[1].trim();
-              
-              // Only send if there's actual content
-              if (text) {
-                controller.enqueue({
-                  type: 'Text',
-                  text
-                });
-              }
-            }
-          }
-        }
-        
-        // Clear the buffer if we've processed it
-        if (foundMatch) {
-          buffer = '';
         }
       }
     },
@@ -182,10 +132,21 @@ export function transformSalesforceStream(stream: ReadableStream): ReadableStrea
     flush(controller) {
       // Process any remaining data in the buffer
       if (buffer.trim()) {
-        controller.enqueue({
-          type: 'Text',
-          text: buffer.trim()
-        });
+        try {
+          const jsonData = JSON.parse(buffer);
+          if (jsonData.message && jsonData.message.message) {
+            controller.enqueue({
+              type: 'Text',
+              text: jsonData.message.message
+            });
+          }
+        } catch (e) {
+          // If parsing fails, send the raw buffer
+          controller.enqueue({
+            type: 'Text',
+            text: buffer.trim()
+          });
+        }
       }
       
       // Send end of response if we haven't already
