@@ -71,7 +71,7 @@ export default function ChatPage() {
         {
           id: 'error',
           role: 'agent',
-          content: 'Failed to connect to Salman Agent. Please try again later.',
+          content: 'Failed to connect to Salesforce Agent. Please try again later.',
           timestamp: new Date(),
         },
       ])
@@ -268,13 +268,13 @@ export default function ChatPage() {
               <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden glow-subtle transition-all duration-300 group-hover:glow">
                 <Image 
                   src="/profile.png" 
-                  alt="Salman Agent Logo" 
+                  alt="Salesforce Agent Logo" 
                   width={40}
                   height={40}
                   className="object-cover"
                 />
               </div>
-              <h1 className="text-lg md:text-xl font-bold ml-2 md:ml-3 text-white">Salman Agent</h1>
+              <h1 className="text-lg md:text-xl font-bold ml-2 md:ml-3 text-white">Salesforce Agent</h1>
             </Link>
           </div>
           
@@ -319,7 +319,7 @@ export default function ChatPage() {
               </svg>
             </div>
             <h2 className="text-2xl font-semibold mb-2 text-white">Welcome!</h2>
-            <p className="text-lg text-white/90">Start a conversation with Salman Agent</p>
+            <p className="text-lg text-white/90">Start a conversation with Salesforce Agent</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -342,7 +342,7 @@ export default function ChatPage() {
                     ) : (
                       <Image 
                         src="/profile.png" 
-                        alt="Salman's Profile" 
+                        alt="Salesforce Agent Profile" 
                         width={40}
                         height={40}
                         className="object-cover"

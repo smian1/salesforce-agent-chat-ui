@@ -48,7 +48,7 @@ export default function Home() {
         <div className="relative w-28 h-28 md:w-40 md:h-40 mx-auto mb-6 md:mb-8 rounded-full overflow-hidden border-4 border-white/10 glow animate-float shadow-lg">
           <Image 
             src="/profile.png" 
-            alt="Salman's Profile" 
+            alt="Salesforce Agent Profile" 
             fill 
             className="object-cover"
           />
@@ -56,11 +56,11 @@ export default function Home() {
         
         <div className="glass rounded-2xl p-4 md:p-8 border border-white/10 glow-subtle">
           <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6 text-white glow-text">
-            Salman Bot
+            Salesforce Agent
           </h1>
           
           <p className="text-lg md:text-xl text-foreground/90 mb-6 md:mb-8 max-w-2xl mx-auto">
-            Chat with my agent to interact and ask questions about me
+            Chat with this agent to interact and ask questions
           </p>
           
           <Link 
