@@ -10,6 +10,18 @@ A web-based chat interface for interacting with Salesforce Agent API.
 - Chat interface with streaming responses
 - Powered by Salesforce AgentForce API
 
+## Screenshots
+
+### Home Page
+The landing page features a modern, dark-themed UI with the Salesforce Agent logo. Users can start a chat session by clicking the "Start Chatting" button.
+
+![Home Page](./screenshot1.png)
+
+### Chat Interface
+The chat interface provides a clean, intuitive experience with the agent's responses displayed in a conversation format. The UI includes a connection status indicator and a "New Chat" button in the header.
+
+![Chat Interface](./screenshot2.png)
+
 ## Salesforce Agent API Setup
 
 To access the Salesforce Agent API, you must set up a connected app that supports the client credential flow. Follow these steps:
