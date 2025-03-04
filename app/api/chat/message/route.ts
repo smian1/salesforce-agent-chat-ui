@@ -51,6 +51,9 @@ export async function GET(request: NextRequest) {
       start(controller) {
         const reader = transformedStream.getReader()
         
+        // Track if we've sent an EndOfResponse event
+        let endOfResponseSent = false
+        
         function pushEvent() {
           reader.read().then(({ done, value }) => {
             if (done) {
@@ -62,9 +65,18 @@ export async function GET(request: NextRequest) {
             // Log the event for debugging
             console.log('Sending SSE event:', value)
             
-            // Convert the event to SSE format
-            const event = `data: ${JSON.stringify(value)}\n\n`
-            controller.enqueue(new TextEncoder().encode(event))
+            // For EndOfResponse events, only send one
+            if (value.type === 'EndOfResponse') {
+              if (!endOfResponseSent) {
+                const event = `data: ${JSON.stringify(value)}\n\n`
+                controller.enqueue(new TextEncoder().encode(event))
+                endOfResponseSent = true
+              }
+            } else {
+              // For all other events, send normally
+              const event = `data: ${JSON.stringify(value)}\n\n`
+              controller.enqueue(new TextEncoder().encode(event))
+            }
             
             // Read the next chunk
             pushEvent()
@@ -80,11 +92,14 @@ export async function GET(request: NextRequest) {
             controller.enqueue(new TextEncoder().encode(errorEvent))
             
             // Send end of response to ensure client knows the stream is done
-            const endEvent = `data: ${JSON.stringify({ 
-              type: 'EndOfResponse'
-            })}\n\n`
-            
-            controller.enqueue(new TextEncoder().encode(endEvent))
+            if (!endOfResponseSent) {
+              const endEvent = `data: ${JSON.stringify({ 
+                type: 'EndOfResponse'
+              })}\n\n`
+              
+              controller.enqueue(new TextEncoder().encode(endEvent))
+              endOfResponseSent = true
+            }
             
             // Close the stream after error
             controller.close()

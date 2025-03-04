@@ -18,9 +18,9 @@ export type EventData = {
  * Transforms a ReadableStream from Salesforce into a stream of parsed events
  * 
  * Based on the Salesforce documentation, the API returns events in the following format:
- * - TextChunk: Contains a chunk of text from the response
+ * - TextChunk: Contains a chunk of text from the response (used for streaming)
  * - ProgressIndicator: Indicates that a response is in progress
- * - Inform: Contains the complete message
+ * - Inform: Contains the complete message (we ignore this to avoid duplication)
  * - EndOfTurn: Indicates that the response is complete
  */
 export function transformSalesforceStream(stream: ReadableStream): ReadableStream<EventData> {
@@ -29,6 +29,9 @@ export function transformSalesforceStream(stream: ReadableStream): ReadableStrea
   
   // Create a buffer to hold partial data
   let buffer = '';
+  
+  // Track the last message to prevent duplicates
+  let lastMessageContent = '';
   
   // Create a transform stream to process the incoming data
   const transform = new TransformStream({
@@ -58,31 +61,35 @@ export function transformSalesforceStream(stream: ReadableStream): ReadableStrea
             // Check if we have a message object
             if (jsonData.message) {
               const messageObj = jsonData.message;
+              const messageContent = messageObj.message || '';
               
               // Handle different message types based on Salesforce documentation
               switch (messageObj.type) {
                 case 'TextChunk':
                   // Text chunk contains a piece of the response
-                  controller.enqueue({
-                    type: 'Text',
-                    text: messageObj.message || ''
-                  });
+                  // Only send if it's not a duplicate of the last message
+                  if (messageContent !== lastMessageContent) {
+                    controller.enqueue({
+                      type: 'Text',
+                      text: messageContent
+                    });
+                    lastMessageContent = messageContent;
+                  }
                   break;
                   
                 case 'ProgressIndicator':
                   // Progress indicator shows the agent is working
                   controller.enqueue({
                     type: 'Progress',
-                    text: messageObj.message || 'Working on it...'
+                    text: messageContent || 'Working on it...'
                   });
                   break;
                   
                 case 'Inform':
                   // Inform contains the complete message
-                  controller.enqueue({
-                    type: 'Text',
-                    text: messageObj.message || ''
-                  });
+                  // We ignore this event type to avoid duplication with TextChunks
+                  // This simplifies our logic and provides a better streaming experience
+                  console.log('Ignoring Inform event to prevent duplication:', messageContent);
                   break;
                   
                 case 'EndOfTurn':
@@ -90,23 +97,26 @@ export function transformSalesforceStream(stream: ReadableStream): ReadableStrea
                   controller.enqueue({
                     type: 'EndOfResponse'
                   });
+                  // Reset the last message tracking after end of turn
+                  lastMessageContent = '';
                   break;
                   
                 default:
                   // For any other message type, try to extract useful text
-                  if (messageObj.message) {
+                  if (messageContent && messageContent !== lastMessageContent) {
                     // Check if this looks like a progress indicator
                     if (messageObj.indicatorType === 'ACTION' || 
-                        /^(Digging into|Looking up|Searching for|Analyzing|Checking|Working on)/i.test(messageObj.message)) {
+                        /^(Digging into|Looking up|Searching for|Analyzing|Checking|Working on)/i.test(messageContent)) {
                       controller.enqueue({
                         type: 'Progress',
-                        text: messageObj.message
+                        text: messageContent
                       });
                     } else {
                       controller.enqueue({
                         type: 'Text',
-                        text: messageObj.message
+                        text: messageContent
                       });
+                      lastMessageContent = messageContent;
                     }
                   }
               }
@@ -134,11 +144,15 @@ export function transformSalesforceStream(stream: ReadableStream): ReadableStrea
       if (buffer.trim()) {
         try {
           const jsonData = JSON.parse(buffer);
-          if (jsonData.message && jsonData.message.message) {
-            controller.enqueue({
-              type: 'Text',
-              text: jsonData.message.message
-            });
+          if (jsonData.message && jsonData.message.message && jsonData.message.type !== 'Inform') {
+            // Only process non-Inform messages in the flush
+            const messageContent = jsonData.message.message;
+            if (messageContent !== lastMessageContent) {
+              controller.enqueue({
+                type: 'Text',
+                text: messageContent
+              });
+            }
           }
         } catch (e) {
           // If parsing fails, send the raw buffer
@@ -153,6 +167,8 @@ export function transformSalesforceStream(stream: ReadableStream): ReadableStrea
       controller.enqueue({
         type: 'EndOfResponse'
       });
+      // Reset the tracking variables
+      lastMessageContent = '';
     }
   });
   
